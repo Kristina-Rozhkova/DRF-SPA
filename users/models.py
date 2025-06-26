@@ -5,38 +5,38 @@ from django.db import models
 class User(AbstractUser):
     username = None
     email = models.EmailField(
-        verbose_name='Электронная почта',
-        help_text='Укажите электронную почту',
-        unique=True
+        verbose_name="Электронная почта",
+        help_text="Укажите электронную почту",
+        unique=True,
     )
     phone = models.CharField(
-        verbose_name='Номер телефона',
-        help_text='Укажите номер телефона',
+        verbose_name="Номер телефона",
+        help_text="Укажите номер телефона",
         max_length=35,
         null=True,
-        blank=True
+        blank=True,
     )
     city = models.CharField(
-        verbose_name='Город',
-        help_text='Укажите город',
+        verbose_name="Город",
+        help_text="Укажите город",
         max_length=50,
         null=True,
-        blank=True
+        blank=True,
     )
     avatar = models.ImageField(
-        upload_to='users/avatars',
+        upload_to="users/avatars",
         null=True,
         blank=True,
-        verbose_name='Аватар',
-        help_text='Загрузите аватар'
+        verbose_name="Аватар",
+        help_text="Загрузите аватар",
     )
 
-    USERNAME_FIELD = 'email'
+    USERNAME_FIELD = "email"
     REQUIRED_FIELDS = []
 
     def __str__(self):
-        return f'{self.email}'
+        return f"{self.email}"
 
     class Meta:
-        verbose_name = 'Пользователь'
-        verbose_name_plural = 'Пользователи'
+        verbose_name = "Пользователь"
+        verbose_name_plural = "Пользователи"
