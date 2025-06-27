@@ -12,6 +12,7 @@ static/drf-yasg
 venv
 env
 .env
+.venv
 /media
 .vscode/
 .coverage
