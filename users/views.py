@@ -5,35 +5,54 @@ from rest_framework.generics import (CreateAPIView, DestroyAPIView,
                                      UpdateAPIView)
 from rest_framework.viewsets import ModelViewSet
 from .models import User, Pay
-from .serializers import UserSerializers, PaySerializer
+from .serializers import UserSerializer, PaySerializer, UserListSerializer, UserPublicSerializer
 from django_filters.rest_framework import DjangoFilterBackend
 from rest_framework import filters
+from rest_framework.permissions import AllowAny
 
 
 class UserCreateAPIView(CreateAPIView):
-    serializer_class = UserSerializers
+    serializer_class = UserSerializer
     queryset = User.objects.all()
+    permission_classes = (AllowAny,)
+
+    def perform_create(self, serializer):
+        user = serializer.save(is_active=True)
+        user.set_password(user.password)
+        user.save()
 
 
 class UserListAPIView(ListAPIView):
-    serializer_class = UserSerializers
+    serializer_class = UserListSerializer
     queryset = User.objects.all()
+
+    def get_serializer_class(self):
+        user = self.request.user
+        if user.id == self.queryset.get(id=user.id):
+            return UserListSerializer
+        return UserPublicSerializer
 
 
 class UserRetrieveAPIView(LoginRequiredMixin, RetrieveAPIView):
-    serializer_class = UserSerializers
     queryset = User.objects.all()
 
-    def get_queryset(self):
-        if self.request.user.is_staff or self.request.user.is_superuser:
-            return self.queryset
-        else:
-            raise PermissionDenied
+    def get_serializer_class(self):
+        user = self.request.user
+        if user.is_staff or user.is_superuser or user.id == self.queryset.get(id=user.id):
+            return UserListSerializer
+        return PermissionDenied
 
 
 class UserUpdateAPIView(UpdateAPIView):
-    serializer_class = UserSerializers
+    serializer_class = UserSerializer
     queryset = User.objects.all()
+
+    def get_serializer_class(self):
+        user = self.request.user
+
+        if user.is_staff or user.is_superuser or user.id == self.queryset.get(id=user.id):
+            return UserListSerializer
+        return PermissionDenied
 
 
 class UserDestroyAPIView(DestroyAPIView):
@@ -46,4 +65,3 @@ class PayViewSet(ModelViewSet):
     filter_backends = [DjangoFilterBackend, filters.OrderingFilter]
     filterset_fields = ('lesson', 'course', 'form_of_payment')
     ordering_fields = ('payment_date',)
-
