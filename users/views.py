@@ -5,7 +5,7 @@ from rest_framework.generics import (CreateAPIView, DestroyAPIView,
                                      UpdateAPIView)
 from rest_framework.viewsets import ModelViewSet
 from .models import User, Pay
-from .serializers import UserSerializer, PaySerializer, UserListSerializer, UserPublicSerializer
+from .serializers import UserSerializer, PaySerializer, UserDetailSerializer, UserPublicSerializer
 from django_filters.rest_framework import DjangoFilterBackend
 from rest_framework import filters
 from rest_framework.permissions import AllowAny
@@ -23,36 +23,38 @@ class UserCreateAPIView(CreateAPIView):
 
 
 class UserListAPIView(ListAPIView):
-    serializer_class = UserListSerializer
     queryset = User.objects.all()
 
     def get_serializer_class(self):
         user = self.request.user
-        if user.id == self.queryset.get(id=user.id):
-            return UserListSerializer
+
+        if user.is_authenticated:
+            return UserPublicSerializer
+        raise PermissionDenied
+
+
+class UserRetrieveAPIView(RetrieveAPIView):
+    queryset = User.objects.all()
+
+    def get_serializer_class(self):
+        user = self.request.user
+        requested_user = self.get_object()
+
+        if user.is_staff or user.is_superuser or user.id == requested_user.id:
+            return UserDetailSerializer
         return UserPublicSerializer
 
 
-class UserRetrieveAPIView(LoginRequiredMixin, RetrieveAPIView):
-    queryset = User.objects.all()
-
-    def get_serializer_class(self):
-        user = self.request.user
-        if user.is_staff or user.is_superuser or user.id == self.queryset.get(id=user.id):
-            return UserListSerializer
-        return PermissionDenied
-
-
 class UserUpdateAPIView(UpdateAPIView):
-    serializer_class = UserSerializer
     queryset = User.objects.all()
 
     def get_serializer_class(self):
         user = self.request.user
+        requested_user = self.get_object()
 
-        if user.is_staff or user.is_superuser or user.id == self.queryset.get(id=user.id):
-            return UserListSerializer
-        return PermissionDenied
+        if user.is_staff or user.is_superuser or user.id == requested_user.id:
+            return UserDetailSerializer
+        raise PermissionDenied
 
 
 class UserDestroyAPIView(DestroyAPIView):

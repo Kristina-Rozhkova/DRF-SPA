@@ -59,7 +59,7 @@ class Lesson(models.Model):
         blank=True,
     )
     course = models.ForeignKey(
-        Course, on_delete=models.SET_NULL, blank=True, null=True, verbose_name="Курс", help_text="Укажите курс"
+        Course, on_delete=models.CASCADE, blank=True, null=True, verbose_name="Курс", help_text="Укажите курс"
     )
     owner = models.ForeignKey(
         'users.User',

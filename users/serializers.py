@@ -20,13 +20,13 @@ class UserPublicSerializer(ModelSerializer):
 
     class Meta:
         model = User
-        fields = ['id', 'email', 'first_name', 'city', 'avatar']
+        fields = ['email', 'first_name', 'city', 'avatar']
         read_only_fields = fields
 
 
-class UserListSerializer(ModelSerializer):
+class UserDetailSerializer(ModelSerializer):
     payment = PaySerializer(many=True, source='user')
 
     class Meta:
         model = User
-        fields = ['email', 'phone', 'city', 'avatar', 'payment']
+        fields = ['email', 'first_name', 'last_name', 'phone', 'city', 'avatar', 'payment']
