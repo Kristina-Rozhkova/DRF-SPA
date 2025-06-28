@@ -25,7 +25,7 @@ class UserPublicSerializer(ModelSerializer):
 
 
 class UserDetailSerializer(ModelSerializer):
-    payment = PaySerializer(many=True, source='user')
+    payment = PaySerializer(many=True, source='user', read_only=True)
 
     class Meta:
         model = User
