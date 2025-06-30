@@ -5,10 +5,11 @@ class IsModer(permissions.BasePermission):
     """
     Проверяет, является ли пользователь модератором
     """
-    message = 'Такие операции может производить только модератор.'
+
+    message = "Такие операции может производить только модератор."
 
     def has_permission(self, request, view):
-        return request.user.groups.filter(name='Модератор').exists()
+        return request.user.groups.filter(name="Модератор").exists()
 
 
 class IsOwner(permissions.BasePermission):
