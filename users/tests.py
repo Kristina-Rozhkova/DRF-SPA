@@ -1,3 +1,5 @@
+from datetime import datetime
+
 from rest_framework.test import APITestCase
 from django.urls import reverse
 
@@ -181,6 +183,7 @@ class PayTestCase(APITestCase):
         }
         url = reverse("users:pay-list")
         response = self.client.post(url, data)
+        print(response.json())
 
         self.assertEqual(
             response.status_code,
@@ -189,7 +192,7 @@ class PayTestCase(APITestCase):
 
         self.assertEqual(
             response.json(),
-            {'id': 1, 'payment_date': '2025-06-28', 'amount': data['amount'],
+            {'id': 1, 'payment_date': datetime.now().strftime('%Y-%m-%d'), 'amount': data['amount'],
              'form_of_payment': data['form_of_payment'], 'user': self.user.pk, 'course': self.course.pk,
              'lesson': None}
         )
