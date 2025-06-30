@@ -19,7 +19,6 @@ urlpatterns = [
     path("admin/", admin.site.urls),
     path("materials/", include("materials.urls", namespace="materials")),
     path("users/", include("users.urls", namespace="users")),
-
     path(
         "swagger/",
         schema_view.with_ui("swagger", cache_timeout=0),

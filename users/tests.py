@@ -1,3 +1,5 @@
+from datetime import datetime
+
 from django.urls import reverse
 from rest_framework import status
 from rest_framework.test import APITestCase
@@ -157,6 +159,7 @@ class PayTestCase(APITestCase):
             "course": self.course.pk,
             "amount": 150000,
             "form_of_payment": "Наличные",
+            "payment_status": "unpaid",
             "user": self.user.pk,
         }
         url = reverse("users:pay-list")
@@ -168,9 +171,12 @@ class PayTestCase(APITestCase):
             response.json(),
             {
                 "id": 1,
-                "payment_date": "2025-06-28",
+                "payment_date": datetime.now().strftime("%Y-%m-%d"),
                 "amount": data["amount"],
                 "form_of_payment": data["form_of_payment"],
+                "session_id": response.json()["session_id"],
+                "link": response.json()["link"],
+                "payment_status": data["payment_status"],
                 "user": self.user.pk,
                 "course": self.course.pk,
                 "lesson": None,
