@@ -1,6 +1,6 @@
 from rest_framework.serializers import ModelSerializer
 
-from .models import User, Pay
+from .models import Pay, User
 
 
 class PaySerializer(ModelSerializer):
@@ -20,13 +20,21 @@ class UserPublicSerializer(ModelSerializer):
 
     class Meta:
         model = User
-        fields = ['email', 'first_name', 'city', 'avatar']
+        fields = ["email", "first_name", "city", "avatar"]
         read_only_fields = fields
 
 
 class UserDetailSerializer(ModelSerializer):
-    payment = PaySerializer(many=True, source='user', read_only=True)
+    payment = PaySerializer(many=True, source="user", read_only=True)
 
     class Meta:
         model = User
-        fields = ['email', 'first_name', 'last_name', 'phone', 'city', 'avatar', 'payment']
+        fields = [
+            "email",
+            "first_name",
+            "last_name",
+            "phone",
+            "city",
+            "avatar",
+            "payment",
+        ]
