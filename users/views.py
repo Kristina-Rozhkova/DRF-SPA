@@ -1,14 +1,16 @@
 from django.contrib.auth.mixins import LoginRequiredMixin
+from django_filters.rest_framework import DjangoFilterBackend
+from rest_framework import filters
 from rest_framework.exceptions import PermissionDenied
 from rest_framework.generics import (CreateAPIView, DestroyAPIView,
                                      ListAPIView, RetrieveAPIView,
                                      UpdateAPIView)
-from rest_framework.viewsets import ModelViewSet
-from .models import User, Pay
-from .serializers import UserSerializer, PaySerializer, UserDetailSerializer, UserPublicSerializer
-from django_filters.rest_framework import DjangoFilterBackend
-from rest_framework import filters
 from rest_framework.permissions import AllowAny
+from rest_framework.viewsets import ModelViewSet
+
+from .models import Pay, User
+from .serializers import (PaySerializer, UserDetailSerializer,
+                          UserPublicSerializer, UserSerializer)
 
 
 class UserCreateAPIView(CreateAPIView):
@@ -65,5 +67,5 @@ class PayViewSet(ModelViewSet):
     queryset = Pay.objects.all()
     serializer_class = PaySerializer
     filter_backends = [DjangoFilterBackend, filters.OrderingFilter]
-    filterset_fields = ('lesson', 'course', 'form_of_payment')
-    ordering_fields = ('payment_date',)
+    filterset_fields = ("lesson", "course", "form_of_payment")
+    ordering_fields = ("payment_date",)

@@ -6,4 +6,4 @@ from users.models import User
 @admin.register(User)
 class UserAdmin(admin.ModelAdmin):
     class Meta:
-        list_filter = ('id', 'email')
+        list_filter = ("id", "email")
