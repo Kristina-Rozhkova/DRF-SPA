@@ -81,4 +81,43 @@ class Pay(models.Model):
         choices=PAYMENT_IN_CHOICES,
         verbose_name="Способ оплаты",
         help_text="Выберите способ оплаты",
+        null=True,
+        blank=True,
     )
+    session_id = models.CharField(
+        verbose_name="Id сессии",
+        help_text="Укажите id сессии",
+        max_length=255,
+        null=True,
+        blank=True,
+    )
+    link = models.URLField(
+        max_length=400,
+        verbose_name="Ссылка на оплату",
+        help_text="Укажите ссылку на оплату",
+        null=True,
+        blank=True,
+    )
+    payment_status = models.CharField(
+        max_length=20,
+        default="unpaid",
+        verbose_name="Статус оплаты",
+        help_text="Укажите статус оплаты",
+        null=True,
+        blank=True,
+    )
+
+    def __str__(self):
+        if self.course:
+            return (
+                f"{self.user} оплатил курс {self.course} {self.payment_date} в размере {self.amount}. Способ оплаты"
+                f" - {self.form_of_payment}."
+            )
+        return (
+            f"{self.user} оплатил урок {self.lesson} {self.payment_date} в размере {self.amount}. Способ оплаты"
+            f" - {self.form_of_payment}."
+        )
+
+    class Meta:
+        verbose_name = "Платеж"
+        verbose_name_plural = "Платежи"

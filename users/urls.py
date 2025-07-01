@@ -1,6 +1,8 @@
 from django.urls import path
+from django.utils.decorators import method_decorator
+from drf_yasg.utils import swagger_auto_schema
 from rest_framework.permissions import AllowAny
-from rest_framework.routers import SimpleRouter
+from rest_framework.routers import DefaultRouter
 from rest_framework_simplejwt.views import (TokenObtainPairView,
                                             TokenRefreshView)
 
@@ -11,8 +13,26 @@ from .views import (PayViewSet, UserCreateAPIView, UserDestroyAPIView,
 
 app_name = UsersConfig.name
 
-router = SimpleRouter()
+router = DefaultRouter()
 router.register(r"pay", PayViewSet, basename="pay")
+
+TokenObtainPairView = method_decorator(
+    name="post",
+    decorator=swagger_auto_schema(
+        operation_summary="Получение JWT-токенов",
+        operation_description="После авторизации доступна функция получение токена. При запросе необходимо указать "
+        "email, пароль. При успешной обработке запроса выводится access токен и refresh токен.",
+    ),
+)(TokenObtainPairView)
+
+TokenRefreshView = method_decorator(
+    name="post",
+    decorator=swagger_auto_schema(
+        operation_summary="Обновление access токена",
+        operation_description="Возможность обновления access токена. Для этого необходимо в запрос передать refresh "
+        "токен.",
+    ),
+)(TokenRefreshView)
 
 urlpatterns = [
     path("", UserListAPIView.as_view(), name="user-list"),
