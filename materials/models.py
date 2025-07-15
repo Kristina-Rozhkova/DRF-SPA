@@ -1,4 +1,5 @@
 from django.db import models
+from django.utils import timezone
 
 
 class Course(models.Model):
@@ -24,6 +25,16 @@ class Course(models.Model):
         null=True,
         blank=True,
         verbose_name="Создатель курса",
+    )
+    update_at = models.DateTimeField(
+        auto_now=True,
+        verbose_name='Дата обновления курса'
+    )
+    notification_task_id = models.CharField(
+        max_length=255,
+        null=True,
+        blank=True,
+        verbose_name='id задачи уведомления'
     )
 
     def __str__(self):
@@ -72,6 +83,10 @@ class Lesson(models.Model):
         blank=True,
         null=True,
         verbose_name="Создатель урока",
+    )
+    update_at = models.DateTimeField(
+        auto_now=True,
+        verbose_name='Дата обновления урока'
     )
 
     def __str__(self):

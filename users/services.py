@@ -1,7 +1,9 @@
 import stripe
 from forex_python.converter import CurrencyRates
-
+import json
+from datetime import datetime, timedelta
 from config.settings import STRIPE_API_KEY
+from django_celery_beat.models import PeriodicTask, IntervalSchedule
 
 stripe.api_key = STRIPE_API_KEY
 
@@ -44,3 +46,21 @@ def check_payment_status(session_id):
         "payment_status": session.payment_status,
         "user_email": session.customer_details.email,
     }
+
+# def set_schedule(*args, **kwargs):
+#     """ Установка расписания для задачи по блокировке пользователей. """
+#     schedule, created = IntervalSchedule.objects.get_or_create(
+#         every=10,
+#         period=IntervalSchedule.SECONDS,
+#     )
+#
+#     PeriodicTask.objects.create(
+#         interval=schedule,  # we created this above.
+#         name='Importing contacts',  # simply describes this periodic task.
+#         task='users.tasks.deactivate_inactive_users',  # name of task.
+#         args=json.dumps(['arg1', 'arg2']),
+#         kwargs=json.dumps({
+#             'be_careful': True,
+#         }),
+#         expires=datetime.utcnow() + timedelta(seconds=30)
+#     )

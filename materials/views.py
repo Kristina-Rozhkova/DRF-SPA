@@ -14,6 +14,9 @@ from materials.models import Course, Lesson, Subscription
 from materials.paginators import CustomPaginator
 from materials.serializers import CourseSerializer, LessonSerializer
 from users.permissions import IsModer, IsOwner
+from materials.tasks import send_email
+from django.utils import timezone
+from celery.result import AsyncResult
 
 
 @method_decorator(
@@ -77,6 +80,23 @@ class CourseViewSet(ModelViewSet):
     def perform_create(self, serializer):
         course = serializer.save()
         course.owner = self.request.user
+        course.save()
+
+    def perform_update(self, serializer):
+        instance = serializer.save()
+        self.schedule_notification(instance.id)
+
+    def schedule_notification(self, course_id):
+        course = Course.objects.get(id=course_id)
+        if course.notification_task_id:
+            AsyncResult(course.notification_task_id).revoke(terminate=True)
+
+        result = send_email.apply_async(
+            args=[course_id],
+            countdown=4 * 60 * 60
+        )
+
+        course.notification_task_id = result.id
         course.save()
 
 
@@ -152,6 +172,14 @@ class LessonUpdateAPIView(UpdateAPIView):
         IsAuthenticated,
         IsModer | IsOwner,
     )
+
+    def perform_update(self, serializer):
+        lesson = serializer.save()
+
+        if lesson.course:
+            lesson.course.update_at = timezone.now()
+            lesson.course.save()
+            CourseViewSet().schedule_notification(lesson.course.id)
 
 
 @method_decorator(
