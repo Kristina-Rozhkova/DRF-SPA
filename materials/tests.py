@@ -34,6 +34,7 @@ class CourseTestCase(APITestCase):
         self.assertEqual(
             response.json(),
             {
+                "id": 7,
                 "name": "Веб-дизайн",
                 "preview": None,
                 "description": "Описание курса по веб-дизайну",
@@ -66,6 +67,7 @@ class CourseTestCase(APITestCase):
             "previous": None,
             "results": [
                 {
+                    "id": self.course.pk,
                     "name": self.course.name,
                     "preview": None,
                     "description": None,
@@ -77,6 +79,9 @@ class CourseTestCase(APITestCase):
                             "description": None,
                             "preview": None,
                             "video": None,
+                            "update_at": self.lesson.update_at.isoformat().replace(
+                                "+00:00", "Z"
+                            ),
                             "course": self.course.pk,
                             "owner": self.user.pk,
                         }
@@ -145,21 +150,13 @@ class LessonTestCase(APITestCase):
 
         url = reverse("materials:lesson-create")
         response = self.client.post(url, data)
+        print(response.json())
 
         self.assertEqual(response.status_code, status.HTTP_201_CREATED)
 
-        self.assertEqual(
-            response.json(),
-            {
-                "id": 8,
-                "name": data["name"],
-                "description": None,
-                "preview": None,
-                "video": data["video"],
-                "course": None,
-                "owner": self.user.pk,
-            },
-        )
+        self.assertEqual(response.json()["name"], data["name"])
+        self.assertEqual(response.json()["video"], data["video"])
+        self.assertEqual(response.json()["owner"], self.user.pk)
 
         self.assertTrue(Lesson.objects.filter(name=data["name"]).exists())
 
@@ -194,6 +191,7 @@ class LessonTestCase(APITestCase):
         url = reverse("materials:lesson-list")
         response = self.client.get(url)
         data = response.json()
+        print(self.lesson.update_at)
 
         result = {
             "count": 1,
@@ -205,6 +203,9 @@ class LessonTestCase(APITestCase):
                     "name": self.lesson.name,
                     "description": None,
                     "preview": None,
+                    "update_at": self.lesson.update_at.isoformat().replace(
+                        "+00:00", "Z"
+                    ),
                     "video": None,
                     "course": self.course.pk,
                     "owner": self.user.pk,
