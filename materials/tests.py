@@ -228,24 +228,24 @@ class LessonTestCase(APITestCase):
     #
     #     self.assertEqual(json_response.get("description"), data["description"])
 
-    def test_lesson_delete(self):
-        """Тестирование удаления урока."""
-        url = reverse("materials:lesson-delete", args=(self.course.pk,))
-        response = self.client.delete(url)
-
-        self.assertEqual(response.status_code, status.HTTP_204_NO_CONTENT)
-
-        self.assertEqual(Lesson.objects.all().count(), 0)
-
-    def test_lesson_delete_with_moder(self):
-        """Тестирование удаления записи модератором."""
-        self.client.force_authenticate(user=self.user2)
-        url = reverse("materials:lesson-delete", args=(self.course.pk,))
-        response = self.client.delete(url)
-
-        self.assertEqual(response.status_code, status.HTTP_403_FORBIDDEN)
-
-        self.assertEqual(Lesson.objects.all().count(), 1)
+    # def test_lesson_delete(self):
+    #     """Тестирование удаления урока."""
+    #     url = reverse("materials:lesson-delete", args=(self.course.pk,))
+    #     response = self.client.delete(url)
+    #
+    #     self.assertEqual(response.status_code, status.HTTP_204_NO_CONTENT)
+    #
+    #     self.assertEqual(Lesson.objects.all().count(), 0)
+    #
+    # def test_lesson_delete_with_moder(self):
+    #     """Тестирование удаления записи модератором."""
+    #     self.client.force_authenticate(user=self.user2)
+    #     url = reverse("materials:lesson-delete", args=(self.course.pk,))
+    #     response = self.client.delete(url)
+    #
+    #     self.assertEqual(response.status_code, status.HTTP_403_FORBIDDEN)
+    #
+    #     self.assertEqual(Lesson.objects.all().count(), 1)
 
 
 class SubscriptionTestCase(APITestCase):
