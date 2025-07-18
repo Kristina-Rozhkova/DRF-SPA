@@ -48,6 +48,7 @@ jobs:
         DB_NAME: test_db
         DB_USER: test_user
         DB_PASSWORD: test_password
+        DB_HOST: localhost
       run: python manage.py migrate
 
     - name: Run tests
@@ -56,6 +57,7 @@ jobs:
         DB_NAME: test_db
         DB_USER: test_user
         DB_PASSWORD: test_password
+        DB_HOST: localhost
       run: python manage.py test
 
     - name: Run linting
