@@ -1,11 +1,12 @@
+from celery.result import AsyncResult
 from django.shortcuts import get_object_or_404
+from django.utils import timezone
 from django.utils.decorators import method_decorator
 from drf_yasg.utils import swagger_auto_schema
-
 from rest_framework.generics import (CreateAPIView, DestroyAPIView,
                                      ListAPIView, RetrieveAPIView,
                                      UpdateAPIView)
-from rest_framework.permissions import IsAdminUser, IsAuthenticated
+from rest_framework.permissions import IsAuthenticated
 from rest_framework.response import Response
 from rest_framework.views import APIView
 from rest_framework.viewsets import ModelViewSet
@@ -13,10 +14,8 @@ from rest_framework.viewsets import ModelViewSet
 from materials.models import Course, Lesson, Subscription
 from materials.paginators import CustomPaginator
 from materials.serializers import CourseSerializer, LessonSerializer
-from users.permissions import IsModer, IsOwner
 from materials.tasks import send_email
-from django.utils import timezone
-from celery.result import AsyncResult
+from users.permissions import IsModer, IsOwner
 
 
 @method_decorator(
@@ -91,10 +90,7 @@ class CourseViewSet(ModelViewSet):
         if course.notification_task_id:
             AsyncResult(course.notification_task_id).revoke(terminate=True)
 
-        result = send_email.apply_async(
-            args=[course_id],
-            countdown=4 * 60 * 60
-        )
+        result = send_email.apply_async(args=[course_id], countdown=4 * 60 * 60)
 
         course.notification_task_id = result.id
         course.save()
@@ -115,6 +111,7 @@ class LessonCreateAPIView(CreateAPIView):
     def perform_create(self, serializer):
         lesson = serializer.save()
         lesson.owner = self.request.user
+        lesson.update_at = timezone.now().replace(second=0, microsecond=0)
         lesson.save()
 
 
@@ -122,8 +119,8 @@ class LessonCreateAPIView(CreateAPIView):
     name="get",
     decorator=swagger_auto_schema(
         operation_summary="Список уроков",
-        operation_description="Получение списка всех уроков. Требуются авторизация. Реализована пагинация по 5 объектов "
-        "на страницу, максимально - 10 уроков на странице.",
+        operation_description="Получение списка всех уроков. Требуются авторизация. Реализована пагинация по 5 "
+        "объектов на страницу, максимально - 10 уроков на странице.",
     ),
 )
 class LessonListAPIView(ListAPIView):
@@ -153,8 +150,8 @@ class LessonRetrieveAPIView(RetrieveAPIView):
     name="patch",
     decorator=swagger_auto_schema(
         operation_summary="Частичное редактирование урока",
-        operation_description="Частичное редактирование информации об уроке. Требуются авторизация, также доступно для "
-        "модераторов и владельцев.",
+        operation_description="Частичное редактирование информации об уроке. Требуются авторизация, "
+        "также доступно для модераторов и владельцев.",
     ),
 )
 @method_decorator(
@@ -177,7 +174,8 @@ class LessonUpdateAPIView(UpdateAPIView):
         lesson = serializer.save()
 
         if lesson.course:
-            lesson.course.update_at = timezone.now()
+            lesson.course.update_at = timezone.now().replace(second=0, microsecond=0)
+            lesson.update_at = timezone.now().replace(second=0, microsecond=0)
             lesson.course.save()
             CourseViewSet().schedule_notification(lesson.course.id)
 

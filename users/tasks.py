@@ -1,7 +1,10 @@
-from celery import shared_task
-from .models import User
-from django.utils import timezone
 from datetime import timedelta
+
+from celery import shared_task
+from django.utils import timezone
+
+from .models import User
+
 
 @shared_task
 def deactivate_inactive_users():
