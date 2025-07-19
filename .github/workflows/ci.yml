@@ -86,45 +86,60 @@ jobs:
     needs: build
 
     steps:
-      - name: Set up SSH
-        uses: webfactory/ssh-agent@v0.9.0
+      - uses: actions/checkout@v4
+
+      - name: Deploy over SSH
+        uses: appleboy/ssh-action@v1.0.0
         with:
-          ssh-private-key: ${{ secrets.SSH_KEY }}
+          host: ${{ secrets.SSH_HOST }}
+          username: ${{ secrets.SSH_USER }}
+          key: ${{ secrets.SSH_KEY }}
+          script: |
+            cd dev/test_atomic
+            git pull origin master
+            docker compose down
+            docker compose up -d --build
 
-      - name: Copy project files to server
-        run: |
-          rsync -avz --exclude '__pycache__' . ${{ secrets.SSH_USER }}@${{ secrets.SERVER_IP }}:${{ secrets.DEPLOY_DIR }}
-
-      - name: Install dependencies on server
-        run: |
-          ssh -o StrictHostKeyChecking=no ${{ secrets.SSH_USER }}@${{ secrets.SERVER_IP }} << 'EOF'
-            cd ${{ secrets.DEPLOY_DIR }}
-            python3 -m venv venv
-            source venv/bin/activate
-            pip install -r requirements.txt
-          EOF
-
-      - name: Apply migrations on server
-        run: |
-          ssh -o StrictHostKeyChecking=no ${{ secrets.SSH_USER }}@${{ secrets.SERVER_IP }} << 'EOF'
-            cd ${{ secrets.DEPLOY_DIR }}
-            source venv/bin/activate
-            python manage.py migrate
-          EOF
-
-      - name: Collect static files on server
-        run: |
-          ssh -o StrictHostKeyChecking=no ${{ secrets.SSH_USER }}@${{ secrets.SERVER_IP }} << 'EOF'
-            cd ${{ secrets.DEPLOY_DIR }}
-            source venv/bin/activate
-            python manage.py collectstatic --noinput
-          EOF
-
-      - name: Restart application
-        run: |
-          ssh -o StrictHostKeyChecking=no ${{ secrets.SSH_USER }}@${{ secrets.SERVER_IP }} << 'EOF'
-            sudo systemctl restart myapp.service
-          EOF
+#    steps:
+#      - name: Set up SSH
+#        uses: webfactory/ssh-agent@v0.9.0
+#        with:
+#          ssh-private-key: ${{ secrets.SSH_KEY }}
+#
+#      - name: Copy project files to server
+#        run: |
+#          rsync -avz --exclude '__pycache__' . ${{ secrets.SSH_USER }}@${{ secrets.SERVER_IP }}:${{ secrets.DEPLOY_DIR }}
+#
+#      - name: Install dependencies on server
+#        run: |
+#          ssh -o StrictHostKeyChecking=no ${{ secrets.SSH_USER }}@${{ secrets.SERVER_IP }} << 'EOF'
+#            cd ${{ secrets.DEPLOY_DIR }}
+#            python3 -m venv venv
+#            source venv/bin/activate
+#            pip install -r requirements.txt
+#          EOF
+#
+#      - name: Apply migrations on server
+#        run: |
+#          ssh -o StrictHostKeyChecking=no ${{ secrets.SSH_USER }}@${{ secrets.SERVER_IP }} << 'EOF'
+#            cd ${{ secrets.DEPLOY_DIR }}
+#            source venv/bin/activate
+#            python manage.py migrate
+#          EOF
+#
+#      - name: Collect static files on server
+#        run: |
+#          ssh -o StrictHostKeyChecking=no ${{ secrets.SSH_USER }}@${{ secrets.SERVER_IP }} << 'EOF'
+#            cd ${{ secrets.DEPLOY_DIR }}
+#            source venv/bin/activate
+#            python manage.py collectstatic --noinput
+#          EOF
+#
+#      - name: Restart application
+#        run: |
+#          ssh -o StrictHostKeyChecking=no ${{ secrets.SSH_USER }}@${{ secrets.SERVER_IP }} << 'EOF'
+#            sudo systemctl restart myapp.service
+#          EOF
 
 
 
