@@ -96,7 +96,7 @@ jobs:
           key: ${{ secrets.SSH_KEY }}
           script: |
             cd /home/study-pltform/DRF-SPA
-            git pull origin master
+            git pull origin feature_finish
             docker compose down
             docker compose up -d --build
 
