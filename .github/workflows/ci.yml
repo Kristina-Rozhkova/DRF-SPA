@@ -112,6 +112,8 @@ jobs:
 #      - name: Copy project files to server
 #        run: |
 #          rsync -avz --exclude '__pycache__' . ${{ secrets.SSH_USER }}@${{ secrets.SERVER_IP }}:${{ secrets.DEPLOY_DIR }}
+      - name: Test SSH connection
+        run: ssh -T ${{ secrets.SSH_USER }}@${{ secrets.SERVER_IP }} echo "SSH connection successful"
 
       - name: Install dependencies on server
         run: |
