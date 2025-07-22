@@ -153,32 +153,22 @@ class PayTestCase(APITestCase):
         self.course = Course.objects.create(name="Python-разработка")
         self.client.force_authenticate(user=self.user)
 
-    # def test_create_payment(self):
-    #     """Тестирование добавления оплаты курсов."""
-    #     data = {
-    #         "course": self.course.pk,
-    #         "amount": 150000,
-    #         "form_of_payment": "Наличные",
-    #         "payment_status": "unpaid",
-    #         "user": self.user.pk,
-    #     }
-    #     url = reverse("users:pay-list")
-    #     response = self.client.post(url, data)
-    #
-    #     self.assertEqual(response.status_code, status.HTTP_201_CREATED)
-    #
-    #     self.assertEqual(
-    #         response.json(),
-    #         {
-    #             "id": 1,
-    #             "payment_date": datetime.now().strftime("%Y-%m-%d"),
-    #             "amount": data["amount"],
-    #             "form_of_payment": data["form_of_payment"],
-    #             "session_id": response.json()["session_id"],
-    #             "link": response.json()["link"],
-    #             "payment_status": data["payment_status"],
-    #             "user": self.user.pk,
-    #             "course": self.course.pk,
-    #             "lesson": None,
-    #         },
-    #     )
+    def test_create_payment(self):
+        """Тестирование добавления оплаты курсов."""
+        data = {
+            "course": self.course.pk,
+            "amount": 150000,
+            "form_of_payment": "Наличные",
+            "payment_status": "unpaid",
+            "user": self.user.pk,
+        }
+        url = reverse("users:pay-list")
+        response = self.client.post(url, data)
+
+        self.assertEqual(response.status_code, status.HTTP_201_CREATED)
+        self.assertEqual(response.json()["amount"], data["amount"])
+        self.assertEqual(response.json()["form_of_payment"], data["form_of_payment"])
+        self.assertEqual(response.json()["payment_status"], data["payment_status"])
+        self.assertEqual(response.json()["user"], self.user.pk)
+        self.assertEqual(response.json()["course"], self.course.pk)
+        self.assertEqual(response.json()["lesson"], None)
