@@ -1,4 +1,4 @@
-from datetime import datetime
+from unittest.mock import patch, MagicMock
 
 from django.urls import reverse
 from rest_framework import status
@@ -153,8 +153,19 @@ class PayTestCase(APITestCase):
         self.course = Course.objects.create(name="Python-разработка")
         self.client.force_authenticate(user=self.user)
 
-    def test_create_payment(self):
+    @patch('users.services.stripe.Price.create')
+    @patch('users.services.stripe.checkout.Session.create')
+    def test_create_payment(self, mock_session_create, mock_price_create):
         """Тестирование добавления оплаты курсов."""
+        mock_price = MagicMock()
+        mock_price.id = 'price_test123'
+        mock_price_create.return_value = mock_price
+
+        mock_session_create.return_value = {
+            'id': 'sess_test123',
+            'url': 'https://checkout.stripe.com/pay/test'
+        }
+
         data = {
             "course": self.course.pk,
             "amount": 150000,
@@ -172,3 +183,7 @@ class PayTestCase(APITestCase):
         self.assertEqual(response.json()["user"], self.user.pk)
         self.assertEqual(response.json()["course"], self.course.pk)
         self.assertEqual(response.json()["lesson"], None)
+
+        mock_price_create.assert_called_once()
+        mock_session_create.assert_called_once()
+
