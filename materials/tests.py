@@ -142,7 +142,6 @@ class LessonTestCase(APITestCase):
 
         url = reverse("materials:lesson-create")
         response = self.client.post(url, data)
-        print(response.json())
 
         self.assertEqual(response.status_code, status.HTTP_201_CREATED)
 
@@ -183,7 +182,6 @@ class LessonTestCase(APITestCase):
         url = reverse("materials:lesson-list")
         response = self.client.get(url)
         data = response.json()
-        print(self.lesson.update_at)
 
         result = {
             "count": 1,

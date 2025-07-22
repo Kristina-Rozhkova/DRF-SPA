@@ -1,4 +1,5 @@
 import os
+import sys
 from datetime import timedelta
 from pathlib import Path
 
@@ -156,3 +157,7 @@ if CACHE_ENABLED:
             "LOCATION": os.getenv("REDIS_URL"),
         }
     }
+
+if 'test' in sys.argv:
+    CELERY_TASK_ALWAYS_EAGER = True
+    CELERY_TASK_EAGER_PROPAGATES = True
