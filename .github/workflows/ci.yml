@@ -113,7 +113,9 @@ jobs:
 #        run: |
 #          rsync -avz --exclude '__pycache__' . ${{ secrets.SSH_USER }}@${{ secrets.SERVER_IP }}:${{ secrets.DEPLOY_DIR }}
       - name: Test SSH connection
-        run: ssh -i ${{ secrets.SSH_KEY }} -vvv ${{ secrets.SSH_USER }}@${{ secrets.SERVER_IP }} echo "debug"
+        run: |
+          ssh -vvv ${{ secrets.SSH_USER }}@${{ secrets.SERVER_IP }} echo "debug"
+          ssh -i ${{ secrets.SSH_KEY }} -vvv ${{ secrets.SSH_USER }}@${{ secrets.SERVER_IP }} echo "debug"
 
       - name: Install dependencies on server
         run: |
