@@ -1,5 +1,5 @@
 from unittest.mock import patch, MagicMock
-
+from forex_python.converter import CurrencyRates
 from django.urls import reverse
 from rest_framework import status
 from rest_framework.test import APITestCase
@@ -155,12 +155,10 @@ class PayTestCase(APITestCase):
 
     @patch('users.services.stripe.Price.create')
     @patch('users.services.stripe.checkout.Session.create')
-    @patch('users.services.CurrencyRates')
-    def test_create_payment(self, mock_currency_rates, mock_session_create, mock_price_create):
+    @patch.object(CurrencyRates, 'get_rate')
+    def test_create_payment(self, mock_get_rate, mock_session_create, mock_price_create):
         """Тестирование добавления оплаты курсов."""
-        mock_c = MagicMock()
-        mock_c.get_rate.return_value = 0.014
-        mock_currency_rates.return_value = mock_c
+        mock_get_rate.return_value = 0.014
 
         mock_price = MagicMock()
         mock_price.id = 'price_test123'
@@ -189,8 +187,7 @@ class PayTestCase(APITestCase):
         self.assertEqual(response.json()["course"], self.course.pk)
         self.assertEqual(response.json()["lesson"], None)
 
-        mock_currency_rates.assert_called_once()
-        mock_c.get_rate.assert_called_once_with("RUB", "USD")
+        mock_get_rate.assert_called_once_with("RUB", "USD")
         mock_price_create.assert_called_once()
         mock_session_create.assert_called_once()
 
