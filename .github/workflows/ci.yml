@@ -86,6 +86,9 @@ jobs:
     needs: build
 
     steps:
+      - name: debug
+        run: |
+          echo "${{ secrets.SSH_KEY }}"
       - name: Deploy over SSH
         uses: appleboy/scp-action@v0.1.4
         with:
