@@ -118,7 +118,6 @@ jobs:
 #          rsync -avz --exclude '__pycache__' . ${{ secrets.SSH_USER }}@${{ secrets.SERVER_IP }}:${{ secrets.DEPLOY_DIR }}
       - name: Test SSH connection
         run: |
-          ssh -vvv ${{ secrets.SSH_USER }}@${{ secrets.SERVER_IP }} echo "debug"
           ssh -i ~/.ssh/id_ed25519 -o StrictHostKeyChecking=no ${{ secrets.SSH_USER }}@${{ secrets.SERVER_IP }} echo "debug"
 
       - name: Install dependencies on server
