@@ -11,10 +11,11 @@ from rest_framework.generics import (CreateAPIView, DestroyAPIView,
 from rest_framework.permissions import AllowAny, IsAdminUser
 from rest_framework.response import Response
 from rest_framework.viewsets import ModelViewSet
+
 from .models import Pay, User
+from .permissions import IsOwner
 from .serializers import (PaySerializer, UserDetailSerializer,
                           UserPublicSerializer, UserSerializer)
-from .permissions import IsModer, IsOwner
 from .services import (check_payment_status, converter, create_stripe_price,
                        create_stripe_sessions)
 
@@ -41,8 +42,8 @@ class UserCreateAPIView(CreateAPIView):
     name="get",
     decorator=swagger_auto_schema(
         operation_summary="Список пользователей",
-        operation_description="Вывод списка авторизованных пользователей. Требуется авторизация. Для просмотра доступны "
-        "поля: email, имя, город, аватар.",
+        operation_description="Вывод списка авторизованных пользователей. Требуется авторизация. "
+        "Для просмотра доступны поля: email, имя, город, аватар.",
         responses={200: UserPublicSerializer(many=True)},
     ),
 )
@@ -61,9 +62,10 @@ class UserListAPIView(ListAPIView):
     name="get",
     decorator=swagger_auto_schema(
         operation_summary="Просмотр профиля",
-        operation_description="Просмотр профиля пользователя. Требуется авторизация. Для владельца профиля и администратора"
-        " для просмотра доступны поля: email, имя, фамилия, телефон, город, аватар, история платежей."
-        " Для других пользователей на просмотр доступны поля: email, имя, город, аватар.",
+        operation_description="Просмотр профиля пользователя. Требуется авторизация. Для владельца профиля и "
+        "администратора для просмотра доступны поля: email, имя, фамилия, телефон, город, "
+        "аватар, история платежей. "
+        "Для других пользователей на просмотр доступны поля: email, имя, город, аватар.",
         responses={
             200: openapi.Response(
                 description="Успешный ответ",
@@ -98,9 +100,9 @@ class UserRetrieveAPIView(RetrieveAPIView):
     name="put",
     decorator=swagger_auto_schema(
         operation_summary="Редактирование профиля",
-        operation_description="Редактирование полей профиля пользователя. Требуется авторизация. Для владельца профиля и "
-        "администратора для редактирования доступны поля: email, имя, фамилия, телефон, город, "
-        "аватар, история платежей.",
+        operation_description="Редактирование полей профиля пользователя. Требуется авторизация. "
+        "Для владельца профиля и администратора для редактирования доступны поля: "
+        "email, имя, фамилия, телефон, город, аватар, история платежей.",
         responses={200: UserDetailSerializer(many=True)},
     ),
 )
