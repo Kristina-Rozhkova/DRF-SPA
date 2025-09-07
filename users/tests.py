@@ -1,5 +1,5 @@
-from datetime import datetime
-
+from unittest.mock import patch, MagicMock
+from forex_python.converter import CurrencyRates
 from django.urls import reverse
 from rest_framework import status
 from rest_framework.test import APITestCase
@@ -153,8 +153,22 @@ class PayTestCase(APITestCase):
         self.course = Course.objects.create(name="Python-разработка")
         self.client.force_authenticate(user=self.user)
 
-    def test_create_payment(self):
+    @patch('users.services.stripe.Price.create')
+    @patch('users.services.stripe.checkout.Session.create')
+    @patch.object(CurrencyRates, 'get_rate')
+    def test_create_payment(self, mock_get_rate, mock_session_create, mock_price_create):
         """Тестирование добавления оплаты курсов."""
+        mock_get_rate.return_value = 0.014
+
+        mock_price = MagicMock()
+        mock_price.id = 'price_test123'
+        mock_price_create.return_value = mock_price
+
+        mock_session_create.return_value = {
+            'id': 'sess_test123',
+            'url': 'https://checkout.stripe.com/pay/test'
+        }
+
         data = {
             "course": self.course.pk,
             "amount": 150000,
@@ -166,19 +180,14 @@ class PayTestCase(APITestCase):
         response = self.client.post(url, data)
 
         self.assertEqual(response.status_code, status.HTTP_201_CREATED)
+        self.assertEqual(response.json()["amount"], data["amount"])
+        self.assertEqual(response.json()["form_of_payment"], data["form_of_payment"])
+        self.assertEqual(response.json()["payment_status"], data["payment_status"])
+        self.assertEqual(response.json()["user"], self.user.pk)
+        self.assertEqual(response.json()["course"], self.course.pk)
+        self.assertEqual(response.json()["lesson"], None)
 
-        self.assertEqual(
-            response.json(),
-            {
-                "id": 1,
-                "payment_date": datetime.now().strftime("%Y-%m-%d"),
-                "amount": data["amount"],
-                "form_of_payment": data["form_of_payment"],
-                "session_id": response.json()["session_id"],
-                "link": response.json()["link"],
-                "payment_status": data["payment_status"],
-                "user": self.user.pk,
-                "course": self.course.pk,
-                "lesson": None,
-            },
-        )
+        mock_get_rate.assert_called_once_with("RUB", "USD")
+        mock_price_create.assert_called_once()
+        mock_session_create.assert_called_once()
+

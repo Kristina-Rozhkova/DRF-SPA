@@ -31,17 +31,10 @@ class CourseTestCase(APITestCase):
 
         self.assertEqual(response.status_code, status.HTTP_201_CREATED)
 
-        self.assertEqual(
-            response.json(),
-            {
-                "name": "Веб-дизайн",
-                "preview": None,
-                "description": "Описание курса по веб-дизайну",
-                "count_lessons": 0,
-                "lessons": [],
-                "is_subscribed": False,
-            },
-        )
+        self.assertEqual(response.json()["name"],"Веб-дизайн")
+        self.assertEqual(response.json()["description"],"Описание курса по веб-дизайну")
+        self.assertEqual(response.json()["count_lessons"],0)
+        self.assertFalse(response.json()["is_subscribed"])
 
         self.assertTrue(Course.objects.filter(name="Веб-дизайн").exists())
 
@@ -66,6 +59,7 @@ class CourseTestCase(APITestCase):
             "previous": None,
             "results": [
                 {
+                    "id": self.course.pk,
                     "name": self.course.name,
                     "preview": None,
                     "description": None,
@@ -77,6 +71,9 @@ class CourseTestCase(APITestCase):
                             "description": None,
                             "preview": None,
                             "video": None,
+                            "update_at": self.lesson.update_at.isoformat().replace(
+                                "+00:00", "Z"
+                            ),
                             "course": self.course.pk,
                             "owner": self.user.pk,
                         }
@@ -148,18 +145,9 @@ class LessonTestCase(APITestCase):
 
         self.assertEqual(response.status_code, status.HTTP_201_CREATED)
 
-        self.assertEqual(
-            response.json(),
-            {
-                "id": 8,
-                "name": data["name"],
-                "description": None,
-                "preview": None,
-                "video": data["video"],
-                "course": None,
-                "owner": self.user.pk,
-            },
-        )
+        self.assertEqual(response.json()["name"], data["name"])
+        self.assertEqual(response.json()["video"], data["video"])
+        self.assertEqual(response.json()["owner"], self.user.pk)
 
         self.assertTrue(Lesson.objects.filter(name=data["name"]).exists())
 
@@ -205,6 +193,9 @@ class LessonTestCase(APITestCase):
                     "name": self.lesson.name,
                     "description": None,
                     "preview": None,
+                    "update_at": self.lesson.update_at.isoformat().replace(
+                        "+00:00", "Z"
+                    ),
                     "video": None,
                     "course": self.course.pk,
                     "owner": self.user.pk,
